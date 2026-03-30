@@ -11,10 +11,10 @@
  */
 
 import globals from 'globals';
-import { EslintStack } from './src/index.js';
+import { Eslint } from './src/index.js';
 
 // eslint-disable-next-line no-restricted-exports
-export default new EslintStack()
+export default new Eslint()
   .globals({
     ...globals.node,
     ...globals.es2024,

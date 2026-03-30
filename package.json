@@ -6,7 +6,7 @@
   },
   "bugs": {
     "email": "tomaschochola@tomaschochola.cz",
-    "url": "https://github.com/tomaschochola/eslint-stack/issues"
+    "url": "https://github.com/tomaschochola/tooling-eslint/issues"
   },
   "contributors": [
     {
@@ -26,26 +26,26 @@
     "globals": "^17.4.0",
     "typescript-eslint": "^8.57.2"
   },
-  "description": "@tomaschochola/eslint-stack",
+  "description": "@tomaschochola/tooling-eslint",
   "devDependencies": {
-    "@tomaschochola/prettier-stack": "github:tomaschochola/prettier-stack#1.x"
+    "@tomaschochola/tooling-prettier": "github:tomaschochola/tooling-prettier#1.x"
   },
   "funding": {
     "type": "github",
     "url": "https://github.com/sponsors/tomaschochola"
   },
-  "homepage": "https://github.com/tomaschochola/eslint-stack",
+  "homepage": "https://github.com/tomaschochola/tooling-eslint",
   "keywords": [
     "tomaschochola",
     "TomasChochola",
     "Tomas Chochola",
     "Tomáš Chochola",
-    "eslint-stack"
+    "tooling-eslint"
   ],
   "license": "CC-BY-ND-4.0",
   "main": "./src/index.js",
-  "name": "@tomaschochola/eslint-stack",
-  "repository": "github:tomaschochola/eslint-stack",
+  "name": "@tomaschochola/tooling-eslint",
+  "repository": "github:tomaschochola/tooling-eslint",
   "sideEffects": false,
   "type": "module"
 }

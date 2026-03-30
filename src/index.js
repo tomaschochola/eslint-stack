@@ -35,7 +35,7 @@ export const selectors = {
   rootTsx: ['*.tsx'],
 };
 
-export class EslintStack {
+export class Eslint {
   config;
 
   constructor() {

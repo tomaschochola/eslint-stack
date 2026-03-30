@@ -10,11 +10,11 @@
  * @see {@link https://github.com/sponsors/tomaschochola} GitHub Sponsors
  */
 
-import { EslintStack, selectors } from '@tomaschochola/eslint-stack';
+import { Eslint, selectors } from '@tomaschochola/tooling-eslint';
 import globals from 'globals';
 
 // eslint-disable-next-line no-restricted-exports
-export default new EslintStack()
+export default new Eslint()
   .globals({
     ...globals.node,
     ...globals.es2024,
