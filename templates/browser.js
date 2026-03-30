@@ -10,16 +10,22 @@
  * @see {@link https://github.com/sponsors/tomaschochola} GitHub Sponsors
  */
 
-import { EslintConfig } from '@tomaschochola/ts-tooling-eslint-config';
+import { EslintStack, selectors } from '@tomaschochola/eslint-stack';
+import globals from 'globals';
 
 // eslint-disable-next-line no-restricted-exports
-export default EslintConfig.compose(
-  EslintConfig.base(),
-  EslintConfig.globalsRc(),
-  EslintConfig.globalsBrowser(),
-  EslintConfig.ignores(),
-  EslintConfig.ignores(['node_modules']),
-  EslintConfig.recommended(),
-  EslintConfig.stylistic(),
-  EslintConfig.sonarjs(),
-);
+export default new EslintStack()
+  .globals({
+    ...globals.node,
+    ...globals.es2024,
+  }, { files: [...selectors.globalRc] })
+  .globals({
+    ...globals.browser,
+    ...globals.es2024,
+  })
+  .ignores()
+  .ignores(['node_modules'])
+  .recommended()
+  .stylistic()
+  .sonarjs()
+  .build();

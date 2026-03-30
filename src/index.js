@@ -11,43 +11,49 @@
  */
 
 import eslint from '@eslint/js';
-import stylex from '@stylexjs/eslint-plugin';
 import stylistic from '@stylistic/eslint-plugin';
 import a11y from 'eslint-plugin-jsx-a11y';
 import react from 'eslint-plugin-react';
-import compiler from 'eslint-plugin-react-compiler';
 import hooks from 'eslint-plugin-react-hooks';
 import sonarjs from 'eslint-plugin-sonarjs';
 import { defineConfig, globalIgnores } from 'eslint/config';
-import globals from 'globals';
 import typescript from 'typescript-eslint';
 
-export const GlobalIgnore = ['**/.DS_Store', '**/.fleet', '**/.idea', '**/.vscode', '**/.zed'];
-export const GlobalJavaScript = ['**/*.js', '**/*.mjs', '**/*.cjs'];
-export const GlobalJsx = ['**/*.jsx'];
-export const GlobalRC = ['**/*.config.js', '**/*.config.mjs', '**/.*rc.js', '**/.*rc.mjs', '**/*.config.cjs', '**/.*rc.cjs'];
-export const GlobalTsx = ['**/*.tsx'];
-export const GlobalTypeScript = ['**/*.ts', '**/*.mts', '**/*.cts'];
-export const RootJavaScript = ['*.js', '*.mjs', '*.cjs'];
-export const RootJsx = ['*.jsx'];
-export const RootRC = ['*.config.js', '*.config.mjs', '.*rc.js', '.*rc.mjs', '*.config.cjs', '.*rc.cjs'];
-export const RootTsx = ['*.tsx'];
-export const RootTypeScript = ['*.ts', '*.mts', '*.cts'];
+export const selectors = {
+  globalEcmaScript: ['**/*.tsx', '**/*.mts', '**/*.ts', '**/*.cts', '**/*.jsx', '**/*.mjs', '**/*.js', '**/*.cjs'],
+  globalIgnore: ['**/.DS_Store', '**/.fleet', '**/.idea', '**/.vscode', '**/.zed'],
+  globalJavaScript: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+  globalRc: ['**/*.config.js', '**/*.config.mjs', '**/.*rc.js', '**/.*rc.mjs', '**/*.config.cjs', '**/.*rc.cjs'],
+  globalJsx: ['**/*.jsx'],
+  globalTypeScript: ['**/*.ts', '**/*.mts', '**/*.cts'],
+  globalTsx: ['**/*.tsx'],
+  rootEcmaScript: ['*.tsx', '*.mts', '*.ts', '*.cts', '*.jsx', '*.mjs', '*.js', '*.cjs'],
+  rootJavaScript: ['*.js', '*.mjs', '*.cjs'],
+  rootRc: ['*.config.js', '*.config.mjs', '.*rc.js', '.*rc.mjs', '*.config.cjs', '.*rc.cjs'],
+  rootJsx: ['*.jsx'],
+  rootTypeScript: ['*.ts', '*.mts', '*.cts'],
+  rootTsx: ['*.tsx'],
+};
 
-export const GlobalEcmaScript = [...GlobalJavaScript, ...GlobalTypeScript, ...GlobalJsx, ...GlobalTsx];
-export const RootEcmaScript = [...RootJavaScript, ...RootTypeScript, ...RootJsx, ...RootTsx];
+export class EslintStack {
+  config;
 
-export class EslintConfig {
-  static nodeEnv() {
-    return process.env.NODE_ENV ?? 'production';
+  constructor() {
+    this.config = [];
   }
 
-  static base() {
-    return [];
+  get NODE_ENV() {
+    return process.env.NODE_ENV;
   }
 
-  static recommended(options = {}) {
-    return {
+  add(config) {
+    this.config = [...this.config, config];
+
+    return this;
+  }
+
+  recommended(options = {}, rules = {}) {
+    return this.add({
       extends: [
         eslint.configs.recommended,
         {
@@ -56,23 +62,24 @@ export class EslintConfig {
               'error',
               {
                 restrictDefaultExports: {
-                  defaultFrom: true,
                   direct: true,
                   named: true,
+                  defaultFrom: true,
                   namedFrom: true,
                   namespaceFrom: true,
                 },
               },
             ],
+            ...rules,
           },
         },
       ],
       ...options,
-    };
+    });
   }
 
-  static typescript(options = {}) {
-    return {
+  typescript(options = {}, rules = {}) {
+    return this.add({
       extends: [
         typescript.configs.strictTypeChecked,
         typescript.configs.stylisticTypeChecked,
@@ -85,7 +92,6 @@ export class EslintConfig {
         },
         {
           rules: {
-
             '@typescript-eslint/consistent-type-exports': 'error',
             '@typescript-eslint/consistent-type-imports': 'error',
             '@typescript-eslint/default-param-last': 'error',
@@ -122,16 +128,16 @@ export class EslintConfig {
             'no-loop-func': 'off',
             'no-shadow': 'off',
             'no-use-before-define': 'off',
+            ...rules,
           },
         },
       ],
-      files: [...GlobalTypeScript, ...GlobalTsx],
       ...options,
-    };
+    });
   }
 
-  static react(options = {}) {
-    return {
+  react(options = {}, rules = {}) {
+    return this.add({
       extends: [
         react.configs.flat['recommended'],
         react.configs.flat['jsx-runtime'],
@@ -187,6 +193,7 @@ export class EslintConfig {
             'react/static-property-placement': 'error',
             'react/style-prop-object': 'error',
             'react/void-dom-elements-no-children': 'error',
+            ...rules,
           },
         },
         {
@@ -198,33 +205,27 @@ export class EslintConfig {
         },
       ],
       ...options,
-    };
+    });
   }
 
-  static reactHooks(options = {}) {
-    return {
+  reactHooks(options = {}, rules = {}) {
+    return this.add({
       extends: [
         hooks.configs['recommended-latest'],
         {
           rules: {
-            'react-hooks/exhaustive-deps': 'error',
             'react-hooks/rules-of-hooks': 'error',
+            'react-hooks/exhaustive-deps': 'error',
+            ...rules,
           },
         },
       ],
       ...options,
-    };
+    });
   }
 
-  static reactCompiler(options = {}) {
-    return {
-      extends: [compiler.configs.recommended],
-      ...options,
-    };
-  }
-
-  static jsxA11y(options = {}) {
-    return {
+  jsxA11y(options = {}, rules = {}) {
+    return this.add({
       extends: [
         a11y.flatConfigs.strict,
         {
@@ -234,45 +235,16 @@ export class EslintConfig {
             'jsx-a11y/lang': 'error',
             'jsx-a11y/no-aria-hidden-on-focusable': 'error',
             'jsx-a11y/prefer-tag-over-role': 'error',
+            ...rules,
           },
         },
       ],
       ...options,
-    };
+    });
   }
 
-  static stylex(options = {}) {
-    return {
-      extends: [
-        {
-          plugins: {
-            '@stylexjs': stylex,
-          },
-          rules: {
-            '@stylexjs/no-legacy-contextual-styles': 'error',
-            '@stylexjs/no-unused': 'error',
-            '@stylexjs/sort-keys': 'error',
-            '@stylexjs/valid-shorthands': 'error',
-            '@stylexjs/valid-styles': [
-              'error',
-              {
-                propLimits: {
-                  viewTimeline: {
-                    limit: null,
-                    reason: 'Only longhand properties are allowed.',
-                  },
-                },
-              },
-            ],
-          },
-        },
-      ],
-      ...options,
-    };
-  }
-
-  static stylistic(options = {}) {
-    return {
+  stylistic(options = {}, rules = {}) {
+    return this.add({
       extends: [
         stylistic.configs.customize({
           arrowParens: true,
@@ -300,35 +272,22 @@ export class EslintConfig {
             '@stylistic/function-call-spacing': 'error',
             '@stylistic/function-paren-newline': ['error', 'consistent'],
             '@stylistic/implicit-arrow-linebreak': 'error',
-            '@stylistic/jsx-child-element-spacing': 'error',
-            '@stylistic/jsx-first-prop-new-line': ['error', 'always'],
-            '@stylistic/jsx-max-props-per-line': [
-              'error',
-              {
-                maximum: 1,
-                when: 'always',
-              },
-            ],
-            '@stylistic/jsx-one-expression-per-line': ['error', { allow: 'none' }],
-            '@stylistic/jsx-pascal-case': 'error',
-            '@stylistic/jsx-props-no-multi-spaces': 'error',
-            '@stylistic/jsx-self-closing-comp': 'error',
             '@stylistic/line-comment-position': 'error',
             '@stylistic/linebreak-style': 'error',
             '@stylistic/lines-around-comment': [
               'error',
               {
+                beforeBlockComment: true,
+                beforeLineComment: true,
                 afterHashbangComment: true,
-                allowArrayStart: true,
                 allowBlockStart: true,
+                allowObjectStart: true,
+                allowArrayStart: true,
                 allowClassStart: true,
                 allowEnumStart: true,
                 allowInterfaceStart: true,
                 allowModuleStart: true,
-                allowObjectStart: true,
                 allowTypeStart: true,
-                beforeBlockComment: true,
-                beforeLineComment: true,
               },
             ],
             '@stylistic/multiline-comment-style': 'error',
@@ -348,193 +307,207 @@ export class EslintConfig {
               'error',
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'return',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'break',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'case',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'class',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'continue',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'debugger',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'default',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'do',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'export',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'for',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'function',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'if',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'switch',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'throw',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'try',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'while',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'with',
-                prev: '*',
               },
               {
                 blankLine: 'always',
-                next: '*',
                 prev: ['const', 'let', 'var'],
+                next: '*',
               },
               {
                 blankLine: 'always',
-                next: '*',
                 prev: ['singleline-const', 'singleline-let', 'singleline-var'],
+                next: '*',
               },
               {
                 blankLine: 'always',
-                next: '*',
                 prev: ['multiline-const', 'multiline-let', 'multiline-var'],
+                next: '*',
               },
               {
                 blankLine: 'always',
-                next: '*',
                 prev: 'import',
+                next: '*',
               },
               {
                 blankLine: 'always',
-                next: '*',
                 prev: 'cjs-import',
+                next: '*',
               },
               {
                 blankLine: 'always',
-                next: '*',
                 prev: 'export',
+                next: '*',
               },
               {
                 blankLine: 'any',
-                next: 'singleline-const',
                 prev: 'singleline-const',
+                next: 'singleline-const',
               },
               {
                 blankLine: 'any',
-                next: 'singleline-let',
                 prev: 'singleline-let',
+                next: 'singleline-let',
               },
               {
                 blankLine: 'any',
-                next: 'singleline-var',
                 prev: 'singleline-var',
+                next: 'singleline-var',
               },
               {
                 blankLine: 'any',
-                next: 'import',
                 prev: 'import',
+                next: 'import',
               },
               {
                 blankLine: 'any',
-                next: 'cjs-import',
                 prev: 'cjs-import',
+                next: 'cjs-import',
               },
               {
                 blankLine: 'any',
-                next: 'export',
                 prev: 'export',
+                next: 'export',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'multiline-const',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'multiline-let',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'multiline-var',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'multiline-export',
-                prev: '*',
               },
               {
                 blankLine: 'always',
+                prev: '*',
                 next: 'block-like',
-                prev: '*',
               },
               {
                 blankLine: 'always',
-                next: '*',
                 prev: 'block-like',
+                next: '*',
               },
             ],
             '@stylistic/semi-style': 'error',
             '@stylistic/switch-colon-spacing': 'error',
             '@stylistic/wrap-regex': 'error',
+            '@stylistic/jsx-child-element-spacing': 'error',
+            '@stylistic/jsx-pascal-case': 'error',
+            '@stylistic/jsx-props-no-multi-spaces': 'error',
+            '@stylistic/jsx-self-closing-comp': 'error',
+            '@stylistic/jsx-max-props-per-line': [
+              'error',
+              {
+                maximum: 1,
+                when: 'always',
+              },
+            ],
+            '@stylistic/jsx-one-expression-per-line': ['error', { allow: 'none' }],
+            '@stylistic/jsx-first-prop-new-line': ['error', 'always'],
+            ...rules,
           },
         },
         stylistic.configs['disable-legacy'],
       ],
       ...options,
-    };
+    });
   }
 
-  static sonarjs(options = {}) {
-    return {
+  sonarjs(options = {}, rules = {}) {
+    return this.add({
       extends: [
         sonarjs.configs.recommended,
         {
@@ -543,15 +516,16 @@ export class EslintConfig {
             'sonarjs/function-return-type': 'off',
             'sonarjs/no-nested-conditional': 'off',
             'sonarjs/void-use': 'off',
+            ...rules,
           },
         },
       ],
       ...options,
-    };
+    });
   }
 
-  static globals(globals, options = {}) {
-    return {
+  globals(globals = {}, options = {}) {
+    return this.add({
       extends: [
         {
           languageOptions: {
@@ -560,55 +534,24 @@ export class EslintConfig {
         },
       ],
       ...options,
-    };
-  }
-
-  static globalsRc(options = {}) {
-    return this.globals({
-      ...globals.node,
-      ...globals.es2026,
-    }, {
-      files: GlobalRC,
-      ...options,
     });
   }
 
-  static globalsBrowser(options = {}) {
-    return this.globals({
-      ...globals.browser,
-      ...globals.es2026,
-    }, {
-      files: GlobalEcmaScript,
-      ...options,
-    });
-  }
-
-  static globalsNode(options = {}) {
-    return this.globals({
-      ...globals.node,
-      ...globals.es2026,
-    }, {
-      files: GlobalEcmaScript,
-      ...options,
-    });
-  }
-
-  static ignores(patterns = GlobalIgnore, name, options = {}) {
-    return {
+  ignores(patterns = selectors.globalIgnore, name = undefined, options = {}) {
+    return this.add({
       extends: [globalIgnores(patterns, name)],
       ...options,
-    };
+    });
   }
 
-  static typescriptDisabled(options = {}) {
-    return {
+  typescriptDisabled(options = {}) {
+    return this.add({
       extends: [typescript.configs.disableTypeChecked],
-      files: [...GlobalJavaScript, ...GlobalJsx],
       ...options,
-    };
+    });
   }
 
-  static compose(...configs) {
-    return defineConfig(...configs);
+  build() {
+    return defineConfig([...this.config]);
   }
 }

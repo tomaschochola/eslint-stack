@@ -85,6 +85,10 @@ devcontainer:
 	devcontainer exec /bin/bash
 	docker compose -f ./docker-compose.yml -f ./docker-compose-devcontainer.yml down --remove-orphans
 
+.PHONY: inspect
+inspect:
+	npm exec --ignore-scripts --no-progress --no-color --loglevel=warn -- eslint --inspect-config
+
 # Dependencies
 ./package-lock.json ./node_modules: ./package.json
 	${MAKE} update_npm

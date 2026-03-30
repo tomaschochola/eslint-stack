@@ -6,7 +6,7 @@
   },
   "bugs": {
     "email": "tomaschochola@tomaschochola.cz",
-    "url": "https://github.com/tomaschochola/ts-tooling-eslint-config/issues"
+    "url": "https://github.com/tomaschochola/eslint-stack/issues"
   },
   "contributors": [
     {
@@ -16,40 +16,36 @@
     }
   ],
   "dependencies": {
-    "@eslint/js": "^9.39.2",
-    "@stylexjs/eslint-plugin": "latest",
-    "@stylexjs/stylex": "latest",
-    "@stylistic/eslint-plugin": "^5.7.0",
-    "eslint": "^9.39.2",
+    "@eslint/js": "^9.39.4",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^9.39.4",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-compiler": "^19.1.0-rc.2",
-    "eslint-plugin-react-hooks": "7.0.0",
-    "eslint-plugin-sonarjs": "^3.0.5",
-    "globals": "^17.0.0",
-    "postcss-value-parser": "^4.2.0",
-    "typescript-eslint": "^8.53.0"
+    "eslint-plugin-react-hooks": "7.0.1",
+    "eslint-plugin-sonarjs": "^4.0.2",
+    "globals": "^17.4.0",
+    "typescript-eslint": "^8.57.2"
   },
-  "description": "@tomaschochola/ts-tooling-eslint-config",
+  "description": "@tomaschochola/eslint-stack",
   "devDependencies": {
-    "@tomaschochola/ts-tooling-prettier-config": "github:tomaschochola/ts-tooling-prettier-config#1.x"
+    "@tomaschochola/prettier-stack": "github:tomaschochola/prettier-stack#1.x"
   },
   "funding": {
     "type": "github",
     "url": "https://github.com/sponsors/tomaschochola"
   },
-  "homepage": "https://github.com/tomaschochola/ts-tooling-eslint-config",
+  "homepage": "https://github.com/tomaschochola/eslint-stack",
   "keywords": [
     "tomaschochola",
     "TomasChochola",
     "Tomas Chochola",
     "Tomáš Chochola",
-    "ts-tooling-eslint-config"
+    "eslint-stack"
   ],
   "license": "CC-BY-ND-4.0",
   "main": "./src/index.js",
-  "name": "@tomaschochola/ts-tooling-eslint-config",
-  "repository": "github:tomaschochola/ts-tooling-eslint-config",
+  "name": "@tomaschochola/eslint-stack",
+  "repository": "github:tomaschochola/eslint-stack",
   "sideEffects": false,
   "type": "module"
 }
