@@ -10,8 +10,8 @@
  * @see {@link https://github.com/sponsors/tomaschochola} GitHub Sponsors
  */
 
-import { EslintStack } from '@tomaschochola/eslint-stack';
 import globals from 'globals';
+import { EslintStack } from './src/index.js';
 
 // eslint-disable-next-line no-restricted-exports
 export default new EslintStack()
