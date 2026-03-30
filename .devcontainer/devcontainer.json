@@ -2,11 +2,7 @@
   "containerUser": "node",
   "customizations": {
     "vscode": {
-      "extensions": [
-        "EditorConfig.EditorConfig",
-        "Tyriar.sort-lines",
-        "docker.docker"
-      ],
+      "extensions": ["EditorConfig.EditorConfig", "Tyriar.sort-lines", "docker.docker"],
       "settings": {
         "editor.codeActionsOnSave": {
           "source.addMissingImports.ts": "explicit",
