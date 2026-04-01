@@ -211,7 +211,7 @@ export class Eslint {
   reactHooks(options = {}, rules = {}) {
     return this.add({
       extends: [
-        hooks.configs['recommended-latest'],
+        hooks.configs.flat['recommended-latest'],
         {
           rules: {
             'react-hooks/rules-of-hooks': 'error',
