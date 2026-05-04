@@ -17,6 +17,7 @@ import react from 'eslint-plugin-react';
 import hooks from 'eslint-plugin-react-hooks';
 import sonarjs from 'eslint-plugin-sonarjs';
 import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
 import typescript from 'typescript-eslint';
 
 export const selectors = {
@@ -35,7 +36,7 @@ export const selectors = {
   rootTsx: ['*.tsx'],
 };
 
-export class Eslint {
+export class ESLint {
   config;
 
   constructor() {
@@ -46,16 +47,22 @@ export class Eslint {
     return process.env.NODE_ENV;
   }
 
-  add(config) {
+  addConfig(config) {
     this.config = [...this.config, config];
 
     return this;
   }
 
-  recommended(options = {}, rules = {}) {
-    return this.add({
+  configJsRecommended(options = {}) {
+    return this.addConfig({
+      extends: [eslint.configs.recommended],
+      ...options,
+    });
+  }
+
+  configJsOpinionatedRules(options = {}, rules = {}) {
+    return this.addConfig({
       extends: [
-        eslint.configs.recommended,
         {
           rules: {
             'no-restricted-exports': [
@@ -78,11 +85,23 @@ export class Eslint {
     });
   }
 
-  typescript(options = {}, rules = {}) {
-    return this.add({
+  configTypeScriptStrictTypeChecked(options = {}) {
+    return this.addConfig({
+      extends: [typescript.configs.strictTypeChecked],
+      ...options,
+    });
+  }
+
+  configTypeScriptStylisticTypeChecked(options = {}) {
+    return this.addConfig({
+      extends: [typescript.configs.stylisticTypeChecked],
+      ...options,
+    });
+  }
+
+  configTypeScriptProjectService(options = {}) {
+    return this.addConfig({
       extends: [
-        typescript.configs.strictTypeChecked,
-        typescript.configs.stylisticTypeChecked,
         {
           languageOptions: {
             parserOptions: {
@@ -90,6 +109,14 @@ export class Eslint {
             },
           },
         },
+      ],
+      ...options,
+    });
+  }
+
+  configTypeScriptOpinionatedRules(options = {}, rules = {}) {
+    return this.addConfig({
+      extends: [
         {
           rules: {
             '@typescript-eslint/consistent-type-exports': 'error',
@@ -136,11 +163,38 @@ export class Eslint {
     });
   }
 
-  react(options = {}, rules = {}) {
-    return this.add({
+  configReactRecommended(options = {}) {
+    return this.addConfig({
+      extends: [react.configs.flat['recommended']],
+      ...options,
+    });
+  }
+
+  configReactJsxRuntime(options = {}) {
+    return this.addConfig({
+      extends: [react.configs.flat['jsx-runtime']],
+      ...options,
+    });
+  }
+
+  configReactSettings(options = {}) {
+    return this.addConfig({
       extends: [
-        react.configs.flat['recommended'],
-        react.configs.flat['jsx-runtime'],
+        {
+          settings: {
+            react: {
+              version: 'detect',
+            },
+          },
+        },
+      ],
+      ...options,
+    });
+  }
+
+  configReactOpinionatedRules(options = {}, rules = {}) {
+    return this.addConfig({
+      extends: [
         {
           rules: {
             'react/boolean-prop-naming': 'error',
@@ -196,38 +250,28 @@ export class Eslint {
             ...rules,
           },
         },
-        {
-          settings: {
-            react: {
-              version: 'detect',
-            },
-          },
-        },
       ],
       ...options,
     });
   }
 
-  reactHooks(options = {}, rules = {}) {
-    return this.add({
-      extends: [
-        hooks.configs.flat['recommended-latest'],
-        {
-          rules: {
-            'react-hooks/rules-of-hooks': 'error',
-            'react-hooks/exhaustive-deps': 'error',
-            ...rules,
-          },
-        },
-      ],
+  configReactHooksRecommendedLatest(options = {}) {
+    return this.addConfig({
+      extends: [hooks.configs.flat['recommended-latest']],
       ...options,
     });
   }
 
-  jsxA11y(options = {}, rules = {}) {
-    return this.add({
+  configJsxA11yStrict(options = {}) {
+    return this.addConfig({
+      extends: [a11y.flatConfigs.strict],
+      ...options,
+    });
+  }
+
+  configJsxA11yOpinionatedRules(options = {}, rules = {}) {
+    return this.addConfig({
       extends: [
-        a11y.flatConfigs.strict,
         {
           rules: {
             'jsx-a11y/anchor-ambiguous-text': 'error',
@@ -243,8 +287,8 @@ export class Eslint {
     });
   }
 
-  stylistic(options = {}, rules = {}) {
-    return this.add({
+  configStylisticCustomized(options = {}, customizeOptions = {}) {
+    return this.addConfig({
       extends: [
         stylistic.configs.customize({
           arrowParens: true,
@@ -256,7 +300,16 @@ export class Eslint {
           quoteProps: 'consistent-as-needed',
           quotes: 'single',
           semi: true,
+          ...customizeOptions,
         }),
+      ],
+      ...options,
+    });
+  }
+
+  configStylisticOpinionatedRules(options = {}, rules = {}) {
+    return this.addConfig({
+      extends: [
         {
           rules: {
             '@stylistic/array-bracket-newline': 'error',
@@ -500,16 +553,28 @@ export class Eslint {
             ...rules,
           },
         },
-        stylistic.configs['disable-legacy'],
       ],
       ...options,
     });
   }
 
-  sonarjs(options = {}, rules = {}) {
-    return this.add({
+  configStylisticDisableLegacy(options = {}) {
+    return this.addConfig({
+      extends: [stylistic.configs['disable-legacy']],
+      ...options,
+    });
+  }
+
+  configSonarJsRecommended(options = {}) {
+    return this.addConfig({
+      extends: [sonarjs.configs.recommended],
+      ...options,
+    });
+  }
+
+  configSonarJsOpinionatedOverrides(options = {}, rules = {}) {
+    return this.addConfig({
       extends: [
-        sonarjs.configs.recommended,
         {
           rules: {
             'sonarjs/cognitive-complexity': 'off',
@@ -524,8 +589,8 @@ export class Eslint {
     });
   }
 
-  globals(globals = {}, options = {}) {
-    return this.add({
+  configGlobals(globals = {}, options = {}) {
+    return this.addConfig({
       extends: [
         {
           languageOptions: {
@@ -537,21 +602,226 @@ export class Eslint {
     });
   }
 
-  ignores(patterns = selectors.globalIgnore, name = undefined, options = {}) {
-    return this.add({
+  configIgnores(patterns = selectors.globalIgnore, name = undefined, options = {}) {
+    return this.addConfig({
       extends: [globalIgnores(patterns, name)],
       ...options,
     });
   }
 
-  typescriptDisabled(options = {}) {
-    return this.add({
+  configGlobalsRc(options = {}) {
+    return this.configGlobals({
+      ...globals.node,
+      ...globals.es2024,
+    }, {
+      files: [...selectors.globalRc],
+      ...options,
+    });
+  }
+
+  configGlobalsBrowser(options = {}) {
+    return this.configGlobals({
+      ...globals.browser,
+      ...globals.es2024,
+    }, options);
+  }
+
+  configGlobalsNode(options = {}) {
+    return this.configGlobals({
+      ...globals.node,
+      ...globals.es2024,
+    }, options);
+  }
+
+  configTypeScriptDisabled(options = {}) {
+    return this.addConfig({
       extends: [typescript.configs.disableTypeChecked],
       ...options,
     });
   }
 
-  build() {
+  presetDefaults(options = {}) {
+    const {
+      configIgnores = true,
+      configNodeModulesIgnores = true,
+      configJsRecommended = true,
+      configJsOpinionatedRules = true,
+      configStylisticCustomized = true,
+      configStylisticOpinionatedRules = true,
+      configStylisticDisableLegacy = true,
+      configSonarJsRecommended = true,
+      configSonarJsOpinionatedOverrides = true,
+    } = options;
+
+    let eslint = this;
+
+    if (configIgnores) {
+      eslint = eslint.configIgnores();
+    }
+
+    if (configNodeModulesIgnores) {
+      eslint = eslint.configIgnores(['node_modules']);
+    }
+
+    if (configJsRecommended) {
+      eslint = eslint.configJsRecommended();
+    }
+
+    if (configJsOpinionatedRules) {
+      eslint = eslint.configJsOpinionatedRules();
+    }
+
+    if (configStylisticCustomized) {
+      eslint = eslint.configStylisticCustomized();
+    }
+
+    if (configStylisticOpinionatedRules) {
+      eslint = eslint.configStylisticOpinionatedRules();
+    }
+
+    if (configStylisticDisableLegacy) {
+      eslint = eslint.configStylisticDisableLegacy();
+    }
+
+    if (configSonarJsRecommended) {
+      eslint = eslint.configSonarJsRecommended();
+    }
+
+    if (configSonarJsOpinionatedOverrides) {
+      eslint = eslint.configSonarJsOpinionatedOverrides();
+    }
+
+    return eslint;
+  }
+
+  presetBrowser(options = {}) {
+    const {
+      configGlobalsRc = true,
+      configGlobalsBrowser = true,
+      presetDefaults = true,
+      presetDefaultsOptions = {},
+    } = options;
+
+    let eslint = this;
+
+    if (configGlobalsRc) {
+      eslint = eslint.configGlobalsRc();
+    }
+
+    if (configGlobalsBrowser) {
+      eslint = eslint.configGlobalsBrowser();
+    }
+
+    if (presetDefaults) {
+      eslint = eslint.presetDefaults(presetDefaultsOptions);
+    }
+
+    return eslint;
+  }
+
+  presetNode(options = {}) {
+    const {
+      configGlobalsNode = true,
+      presetDefaults = true,
+      presetDefaultsOptions = {},
+    } = options;
+
+    let eslint = this;
+
+    if (configGlobalsNode) {
+      eslint = eslint.configGlobalsNode();
+    }
+
+    if (presetDefaults) {
+      eslint = eslint.presetDefaults(presetDefaultsOptions);
+    }
+
+    return eslint;
+  }
+
+  presetTypeScript(options = {}) {
+    const {
+      files = [...selectors.globalTypeScript, ...selectors.globalTsx],
+      disabledFiles = [...selectors.globalJavaScript, ...selectors.globalJsx],
+      configTypeScriptStrictTypeChecked = true,
+      configTypeScriptStylisticTypeChecked = true,
+      configTypeScriptProjectService = true,
+      configTypeScriptOpinionatedRules = true,
+      configTypeScriptDisabled = true,
+    } = options;
+
+    const enabledOptions = files === false ? {} : { files: [...files] };
+    const disabledOptions = disabledFiles === false ? {} : { files: [...disabledFiles] };
+    let eslint = this;
+
+    if (configTypeScriptStrictTypeChecked) {
+      eslint = eslint.configTypeScriptStrictTypeChecked(enabledOptions);
+    }
+
+    if (configTypeScriptStylisticTypeChecked) {
+      eslint = eslint.configTypeScriptStylisticTypeChecked(enabledOptions);
+    }
+
+    if (configTypeScriptProjectService) {
+      eslint = eslint.configTypeScriptProjectService(enabledOptions);
+    }
+
+    if (configTypeScriptOpinionatedRules) {
+      eslint = eslint.configTypeScriptOpinionatedRules(enabledOptions);
+    }
+
+    if (configTypeScriptDisabled) {
+      eslint = eslint.configTypeScriptDisabled(disabledOptions);
+    }
+
+    return eslint;
+  }
+
+  presetReact(options = {}) {
+    const {
+      configReactRecommended = true,
+      configReactJsxRuntime = true,
+      configReactSettings = true,
+      configReactOpinionatedRules = true,
+      configJsxA11yStrict = true,
+      configJsxA11yOpinionatedRules = true,
+      configReactHooksRecommendedLatest = true,
+    } = options;
+
+    let eslint = this;
+
+    if (configReactRecommended) {
+      eslint = eslint.configReactRecommended();
+    }
+
+    if (configReactJsxRuntime) {
+      eslint = eslint.configReactJsxRuntime();
+    }
+
+    if (configReactSettings) {
+      eslint = eslint.configReactSettings();
+    }
+
+    if (configReactOpinionatedRules) {
+      eslint = eslint.configReactOpinionatedRules();
+    }
+
+    if (configJsxA11yStrict) {
+      eslint = eslint.configJsxA11yStrict();
+    }
+
+    if (configJsxA11yOpinionatedRules) {
+      eslint = eslint.configJsxA11yOpinionatedRules();
+    }
+
+    if (configReactHooksRecommendedLatest) {
+      eslint = eslint.configReactHooksRecommendedLatest();
+    }
+
+    return eslint;
+  }
+
+  buildConfig() {
     return defineConfig([...this.config]);
   }
 }
