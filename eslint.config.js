@@ -10,9 +10,18 @@
  * @see {@link https://github.com/sponsors/tomaschochola} GitHub Sponsors
  */
 
-import { ESLint } from './src/index.js';
+import { ESLintConfigBuilder, filePatterns } from './src/index.js';
 
 // eslint-disable-next-line no-restricted-exports
-export default new ESLint()
-  .presetNode()
-  .buildConfig();
+export default new ESLintConfigBuilder()
+  .addNodeGlobals()
+  .addGlobalIgnores(filePatterns.defaultIgnorePatterns)
+  .addGlobalIgnores(['node_modules'])
+  .addJavaScriptRecommendedRules()
+  .addJavaScriptPolicyRules()
+  .addStylisticCustomizedRules()
+  .addStylisticPolicyRules()
+  .disableStylisticLegacyRules()
+  .addSonarJsRecommendedRules()
+  .addSonarJsPolicyOverrides()
+  .toConfig();

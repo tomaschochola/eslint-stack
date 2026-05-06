@@ -20,48 +20,64 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import typescript from 'typescript-eslint';
 
-export const selectors = {
-  globalEcmaScript: ['**/*.tsx', '**/*.mts', '**/*.ts', '**/*.cts', '**/*.jsx', '**/*.mjs', '**/*.js', '**/*.cjs'],
-  globalIgnore: ['**/.DS_Store', '**/.fleet', '**/.idea', '**/.vscode', '**/.zed'],
-  globalJavaScript: ['**/*.js', '**/*.mjs', '**/*.cjs'],
-  globalRc: ['**/*.config.js', '**/*.config.mjs', '**/.*rc.js', '**/.*rc.mjs', '**/*.config.cjs', '**/.*rc.cjs'],
-  globalJsx: ['**/*.jsx'],
-  globalTypeScript: ['**/*.ts', '**/*.mts', '**/*.cts'],
-  globalTsx: ['**/*.tsx'],
-  rootEcmaScript: ['*.tsx', '*.mts', '*.ts', '*.cts', '*.jsx', '*.mjs', '*.js', '*.cjs'],
-  rootJavaScript: ['*.js', '*.mjs', '*.cjs'],
-  rootRc: ['*.config.js', '*.config.mjs', '.*rc.js', '.*rc.mjs', '*.config.cjs', '.*rc.cjs'],
-  rootJsx: ['*.jsx'],
-  rootTypeScript: ['*.ts', '*.mts', '*.cts'],
-  rootTsx: ['*.tsx'],
-};
+export const filePatterns = Object.freeze({
+  allScriptFiles: Object.freeze(['**/*.tsx', '**/*.mts', '**/*.ts', '**/*.cts', '**/*.jsx', '**/*.mjs', '**/*.js', '**/*.cjs']),
+  allJavaScriptFiles: Object.freeze(['**/*.js', '**/*.mjs', '**/*.cjs']),
+  allJsxFiles: Object.freeze(['**/*.jsx']),
+  allTypeScriptFiles: Object.freeze(['**/*.ts', '**/*.mts', '**/*.cts']),
+  allTsxFiles: Object.freeze(['**/*.tsx']),
+  allConfigScriptFiles: Object.freeze(['**/*.config.js', '**/*.config.mjs', '**/.*rc.js', '**/.*rc.mjs', '**/*.config.cjs', '**/.*rc.cjs']),
+  rootScriptFiles: Object.freeze(['*.tsx', '*.mts', '*.ts', '*.cts', '*.jsx', '*.mjs', '*.js', '*.cjs']),
+  rootJavaScriptFiles: Object.freeze(['*.js', '*.mjs', '*.cjs']),
+  rootJsxFiles: Object.freeze(['*.jsx']),
+  rootTypeScriptFiles: Object.freeze(['*.ts', '*.mts', '*.cts']),
+  rootTsxFiles: Object.freeze(['*.tsx']),
+  rootConfigScriptFiles: Object.freeze(['*.config.js', '*.config.mjs', '.*rc.js', '.*rc.mjs', '*.config.cjs', '.*rc.cjs']),
+  defaultIgnorePatterns: Object.freeze(['**/.DS_Store', '**/.fleet', '**/.idea', '**/.vscode', '**/.zed']),
+});
 
-export class ESLint {
-  config;
+const filesConfig = (files) => (files === undefined ? {} : { files: [...files] });
+
+export class ESLintConfigBuilder {
+  #config;
 
   constructor() {
-    this.config = [];
+    this.#config = [];
   }
 
-  get NODE_ENV() {
-    return process.env.NODE_ENV;
-  }
-
-  addConfig(config) {
-    this.config = [...this.config, config];
+  #addConfig(config) {
+    this.#config = [...this.#config, config];
 
     return this;
   }
 
-  configJsRecommended(options = {}) {
-    return this.addConfig({
-      extends: [eslint.configs.recommended],
-      ...options,
+  #addGlobals(globals = {}, { files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
+      extends: [
+        {
+          languageOptions: {
+            globals: globals,
+          },
+        },
+      ],
     });
   }
 
-  configJsOpinionatedRules(options = {}, rules = {}) {
-    return this.addConfig({
+  addRawConfig(config) {
+    return this.#addConfig(config);
+  }
+
+  addJavaScriptRecommendedRules({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
+      extends: [eslint.configs.recommended],
+    });
+  }
+
+  addJavaScriptPolicyRules({ files, rules = {} } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [
         {
           rules: {
@@ -81,26 +97,26 @@ export class ESLint {
           },
         },
       ],
-      ...options,
     });
   }
 
-  configTypeScriptStrictTypeChecked(options = {}) {
-    return this.addConfig({
+  addTypeScriptStrictTypeCheckedRules({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [typescript.configs.strictTypeChecked],
-      ...options,
     });
   }
 
-  configTypeScriptStylisticTypeChecked(options = {}) {
-    return this.addConfig({
+  addTypeScriptStylisticTypeCheckedRules({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [typescript.configs.stylisticTypeChecked],
-      ...options,
     });
   }
 
-  configTypeScriptProjectService(options = {}) {
-    return this.addConfig({
+  enableTypeScriptProjectService({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [
         {
           languageOptions: {
@@ -110,12 +126,12 @@ export class ESLint {
           },
         },
       ],
-      ...options,
     });
   }
 
-  configTypeScriptOpinionatedRules(options = {}, rules = {}) {
-    return this.addConfig({
+  addTypeScriptPolicyRules({ files, rules = {} } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [
         {
           rules: {
@@ -159,26 +175,26 @@ export class ESLint {
           },
         },
       ],
-      ...options,
     });
   }
 
-  configReactRecommended(options = {}) {
-    return this.addConfig({
+  addReactRecommendedRules({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [react.configs.flat['recommended']],
-      ...options,
     });
   }
 
-  configReactJsxRuntime(options = {}) {
-    return this.addConfig({
+  addReactJsxRuntimeRules({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [react.configs.flat['jsx-runtime']],
-      ...options,
     });
   }
 
-  configReactSettings(options = {}) {
-    return this.addConfig({
+  addReactVersionDetection({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [
         {
           settings: {
@@ -188,12 +204,12 @@ export class ESLint {
           },
         },
       ],
-      ...options,
     });
   }
 
-  configReactOpinionatedRules(options = {}, rules = {}) {
-    return this.addConfig({
+  addReactPolicyRules({ files, rules = {} } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [
         {
           rules: {
@@ -251,26 +267,26 @@ export class ESLint {
           },
         },
       ],
-      ...options,
     });
   }
 
-  configReactHooksRecommendedLatest(options = {}) {
-    return this.addConfig({
+  addReactHooksRecommendedLatestRules({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [hooks.configs.flat['recommended-latest']],
-      ...options,
     });
   }
 
-  configJsxA11yStrict(options = {}) {
-    return this.addConfig({
+  addJsxAccessibilityStrictRules({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [a11y.flatConfigs.strict],
-      ...options,
     });
   }
 
-  configJsxA11yOpinionatedRules(options = {}, rules = {}) {
-    return this.addConfig({
+  addJsxAccessibilityPolicyRules({ files, rules = {} } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [
         {
           rules: {
@@ -283,12 +299,12 @@ export class ESLint {
           },
         },
       ],
-      ...options,
     });
   }
 
-  configStylisticCustomized(options = {}, customizeOptions = {}) {
-    return this.addConfig({
+  addStylisticCustomizedRules({ files, customize = {} } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [
         stylistic.configs.customize({
           arrowParens: true,
@@ -300,15 +316,15 @@ export class ESLint {
           quoteProps: 'consistent-as-needed',
           quotes: 'single',
           semi: true,
-          ...customizeOptions,
+          ...customize,
         }),
       ],
-      ...options,
     });
   }
 
-  configStylisticOpinionatedRules(options = {}, rules = {}) {
-    return this.addConfig({
+  addStylisticPolicyRules({ files, rules = {} } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [
         {
           rules: {
@@ -554,30 +570,29 @@ export class ESLint {
           },
         },
       ],
-      ...options,
     });
   }
 
-  configStylisticDisableLegacy(options = {}) {
-    return this.addConfig({
+  disableStylisticLegacyRules({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [stylistic.configs['disable-legacy']],
-      ...options,
     });
   }
 
-  configSonarJsRecommended(options = {}) {
-    return this.addConfig({
+  addSonarJsRecommendedRules({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [sonarjs.configs.recommended],
-      ...options,
     });
   }
 
-  configSonarJsOpinionatedOverrides(options = {}, rules = {}) {
-    return this.addConfig({
+  addSonarJsPolicyOverrides({ files, rules = {} } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [
         {
           rules: {
-            'sonarjs/cognitive-complexity': 'off',
             'sonarjs/function-return-type': 'off',
             'sonarjs/no-nested-conditional': 'off',
             'sonarjs/void-use': 'off',
@@ -585,243 +600,46 @@ export class ESLint {
           },
         },
       ],
-      ...options,
     });
   }
 
-  configGlobals(globals = {}, options = {}) {
-    return this.addConfig({
-      extends: [
-        {
-          languageOptions: {
-            globals: globals,
-          },
-        },
-      ],
-      ...options,
-    });
-  }
-
-  configIgnores(patterns = selectors.globalIgnore, name = undefined, options = {}) {
-    return this.addConfig({
+  addGlobalIgnores(patterns = filePatterns.defaultIgnorePatterns, name = undefined) {
+    return this.#addConfig({
       extends: [globalIgnores(patterns, name)],
-      ...options,
     });
   }
 
-  configGlobalsRc(options = {}) {
-    return this.configGlobals({
+  addNodeGlobalsForConfigFiles() {
+    return this.#addGlobals({
       ...globals.node,
       ...globals.es2024,
     }, {
-      files: [...selectors.globalRc],
-      ...options,
+      files: filePatterns.allConfigScriptFiles,
     });
   }
 
-  configGlobalsBrowser(options = {}) {
-    return this.configGlobals({
+  addBrowserGlobals({ files } = {}) {
+    return this.#addGlobals({
       ...globals.browser,
       ...globals.es2024,
-    }, options);
+    }, { files });
   }
 
-  configGlobalsNode(options = {}) {
-    return this.configGlobals({
+  addNodeGlobals({ files } = {}) {
+    return this.#addGlobals({
       ...globals.node,
       ...globals.es2024,
-    }, options);
+    }, { files });
   }
 
-  configTypeScriptDisabled(options = {}) {
-    return this.addConfig({
+  disableTypeScriptTypeChecking({ files } = {}) {
+    return this.#addConfig({
+      ...filesConfig(files),
       extends: [typescript.configs.disableTypeChecked],
-      ...options,
     });
   }
 
-  presetDefaults(options = {}) {
-    const {
-      configIgnores = true,
-      configNodeModulesIgnores = true,
-      configJsRecommended = true,
-      configJsOpinionatedRules = true,
-      configStylisticCustomized = true,
-      configStylisticOpinionatedRules = true,
-      configStylisticDisableLegacy = true,
-      configSonarJsRecommended = true,
-      configSonarJsOpinionatedOverrides = true,
-    } = options;
-
-    let eslint = this;
-
-    if (configIgnores) {
-      eslint = eslint.configIgnores();
-    }
-
-    if (configNodeModulesIgnores) {
-      eslint = eslint.configIgnores(['node_modules']);
-    }
-
-    if (configJsRecommended) {
-      eslint = eslint.configJsRecommended();
-    }
-
-    if (configJsOpinionatedRules) {
-      eslint = eslint.configJsOpinionatedRules();
-    }
-
-    if (configStylisticCustomized) {
-      eslint = eslint.configStylisticCustomized();
-    }
-
-    if (configStylisticOpinionatedRules) {
-      eslint = eslint.configStylisticOpinionatedRules();
-    }
-
-    if (configStylisticDisableLegacy) {
-      eslint = eslint.configStylisticDisableLegacy();
-    }
-
-    if (configSonarJsRecommended) {
-      eslint = eslint.configSonarJsRecommended();
-    }
-
-    if (configSonarJsOpinionatedOverrides) {
-      eslint = eslint.configSonarJsOpinionatedOverrides();
-    }
-
-    return eslint;
-  }
-
-  presetBrowser(options = {}) {
-    const {
-      configGlobalsRc = true,
-      configGlobalsBrowser = true,
-      presetDefaults = true,
-      presetDefaultsOptions = {},
-    } = options;
-
-    let eslint = this;
-
-    if (configGlobalsRc) {
-      eslint = eslint.configGlobalsRc();
-    }
-
-    if (configGlobalsBrowser) {
-      eslint = eslint.configGlobalsBrowser();
-    }
-
-    if (presetDefaults) {
-      eslint = eslint.presetDefaults(presetDefaultsOptions);
-    }
-
-    return eslint;
-  }
-
-  presetNode(options = {}) {
-    const {
-      configGlobalsNode = true,
-      presetDefaults = true,
-      presetDefaultsOptions = {},
-    } = options;
-
-    let eslint = this;
-
-    if (configGlobalsNode) {
-      eslint = eslint.configGlobalsNode();
-    }
-
-    if (presetDefaults) {
-      eslint = eslint.presetDefaults(presetDefaultsOptions);
-    }
-
-    return eslint;
-  }
-
-  presetTypeScript(options = {}) {
-    const {
-      files = [...selectors.globalTypeScript, ...selectors.globalTsx],
-      disabledFiles = [...selectors.globalJavaScript, ...selectors.globalJsx],
-      configTypeScriptStrictTypeChecked = true,
-      configTypeScriptStylisticTypeChecked = true,
-      configTypeScriptProjectService = true,
-      configTypeScriptOpinionatedRules = true,
-      configTypeScriptDisabled = true,
-    } = options;
-
-    const enabledOptions = files === false ? {} : { files: [...files] };
-    const disabledOptions = disabledFiles === false ? {} : { files: [...disabledFiles] };
-    let eslint = this;
-
-    if (configTypeScriptStrictTypeChecked) {
-      eslint = eslint.configTypeScriptStrictTypeChecked(enabledOptions);
-    }
-
-    if (configTypeScriptStylisticTypeChecked) {
-      eslint = eslint.configTypeScriptStylisticTypeChecked(enabledOptions);
-    }
-
-    if (configTypeScriptProjectService) {
-      eslint = eslint.configTypeScriptProjectService(enabledOptions);
-    }
-
-    if (configTypeScriptOpinionatedRules) {
-      eslint = eslint.configTypeScriptOpinionatedRules(enabledOptions);
-    }
-
-    if (configTypeScriptDisabled) {
-      eslint = eslint.configTypeScriptDisabled(disabledOptions);
-    }
-
-    return eslint;
-  }
-
-  presetReact(options = {}) {
-    const {
-      configReactRecommended = true,
-      configReactJsxRuntime = true,
-      configReactSettings = true,
-      configReactOpinionatedRules = true,
-      configJsxA11yStrict = true,
-      configJsxA11yOpinionatedRules = true,
-      configReactHooksRecommendedLatest = true,
-    } = options;
-
-    let eslint = this;
-
-    if (configReactRecommended) {
-      eslint = eslint.configReactRecommended();
-    }
-
-    if (configReactJsxRuntime) {
-      eslint = eslint.configReactJsxRuntime();
-    }
-
-    if (configReactSettings) {
-      eslint = eslint.configReactSettings();
-    }
-
-    if (configReactOpinionatedRules) {
-      eslint = eslint.configReactOpinionatedRules();
-    }
-
-    if (configJsxA11yStrict) {
-      eslint = eslint.configJsxA11yStrict();
-    }
-
-    if (configJsxA11yOpinionatedRules) {
-      eslint = eslint.configJsxA11yOpinionatedRules();
-    }
-
-    if (configReactHooksRecommendedLatest) {
-      eslint = eslint.configReactHooksRecommendedLatest();
-    }
-
-    return eslint;
-  }
-
-  buildConfig() {
-    return defineConfig([...this.config]);
+  toConfig() {
+    return defineConfig([...this.#config]);
   }
 }
