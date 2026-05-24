@@ -129,6 +129,22 @@ export class ESLintConfigBuilder {
     });
   }
 
+  enableTypeScriptProject({ files, project }) {
+    return this.#addConfig({
+      ...filesConfig(files),
+      extends: [
+        {
+          languageOptions: {
+            parserOptions: {
+              project: project,
+              projectService: false,
+            },
+          },
+        },
+      ],
+    });
+  }
+
   addTypeScriptPolicyRules({ files, rules = {} } = {}) {
     return this.#addConfig({
       ...filesConfig(files),
