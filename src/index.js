@@ -27,6 +27,7 @@ export const filePatterns = Object.freeze({
   allTypeScriptFiles: Object.freeze(['**/*.ts', '**/*.mts', '**/*.cts']),
   allTsxFiles: Object.freeze(['**/*.tsx']),
   allConfigScriptFiles: Object.freeze(['**/*.config.js', '**/*.config.mjs', '**/.*rc.js', '**/.*rc.mjs', '**/*.config.cjs', '**/.*rc.cjs']),
+  playwrightTypeScriptFiles: Object.freeze(['tests/**/*.ts']),
   rootScriptFiles: Object.freeze(['*.tsx', '*.mts', '*.ts', '*.cts', '*.jsx', '*.mjs', '*.js', '*.cjs']),
   rootJavaScriptFiles: Object.freeze(['*.js', '*.mjs', '*.cjs']),
   rootJsxFiles: Object.freeze(['*.jsx']),
