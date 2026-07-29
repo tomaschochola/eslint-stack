@@ -598,7 +598,7 @@ export class ESLintConfigBuilder {
             '@stylistic/wrap-regex': 'error',
             '@stylistic/jsx-child-element-spacing': 'error',
             '@stylistic/jsx-pascal-case': 'error',
-            '@stylistic/jsx-props-no-multi-spaces': 'error',
+            '@stylistic/no-multi-spaces': 'error',
             '@stylistic/jsx-self-closing-comp': 'error',
             '@stylistic/jsx-max-props-per-line': [
               'error',
