@@ -19,14 +19,19 @@ const javascriptFiles = [...filePatterns.allJavaScriptFiles, ...filePatterns.all
 export default new ESLintConfigBuilder()
   .addNodeGlobalsForConfigFiles()
   .addBrowserGlobals()
-  .addGlobalIgnores(filePatterns.defaultIgnorePatterns)
-  .addGlobalIgnores(['node_modules'])
+  .addGitIgnoreFile(import.meta.url)
   .addJavaScriptRecommendedRules()
   .addJavaScriptPolicyRules()
   .addTypeScriptStrictTypeCheckedRules({ files: typescriptFiles })
   .addTypeScriptStylisticTypeCheckedRules({ files: typescriptFiles })
   .enableTypeScriptProjectService({ files: typescriptFiles })
   .addTypeScriptPolicyRules({ files: typescriptFiles })
+  .addRawConfig({
+    files: filePatterns.allTypeScriptDeclarationFiles,
+    rules: {
+      'no-restricted-exports': 'off',
+    },
+  })
   .disableTypeScriptTypeChecking({ files: javascriptFiles })
   .addReactRecommendedRules()
   .addReactJsxRuntimeRules()

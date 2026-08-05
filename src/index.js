@@ -10,6 +10,7 @@
  * @see {@link https://github.com/sponsors/tomaschochola} GitHub Sponsors
  */
 
+import { includeIgnoreFile } from '@eslint/compat';
 import eslint from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import a11y from 'eslint-plugin-jsx-a11y';
@@ -18,49 +19,50 @@ import hooks from 'eslint-plugin-react-hooks';
 import sonarjs from 'eslint-plugin-sonarjs';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
+import { fileURLToPath } from 'node:url';
 import typescript from 'typescript-eslint';
 
 export const filePatterns = Object.freeze({
-  allScriptFiles: Object.freeze(['**/*.tsx', '**/*.mts', '**/*.ts', '**/*.cts', '**/*.jsx', '**/*.mjs', '**/*.js', '**/*.cjs']),
-  allJavaScriptFiles: Object.freeze(['**/*.js', '**/*.mjs', '**/*.cjs']),
+  allScriptFiles: Object.freeze(['**/*.cjs', '**/*.cts', '**/*.js', '**/*.jsx', '**/*.mjs', '**/*.mts', '**/*.ts', '**/*.tsx']),
+  allJavaScriptFiles: Object.freeze(['**/*.cjs', '**/*.js', '**/*.mjs']),
   allJsxFiles: Object.freeze(['**/*.jsx']),
-  allTypeScriptFiles: Object.freeze(['**/*.ts', '**/*.mts', '**/*.cts']),
+  allTypeScriptDeclarationFiles: Object.freeze(['**/*.d.cts', '**/*.d.mts', '**/*.d.ts', '**/*.d.*.ts']),
+  allTypeScriptFiles: Object.freeze(['**/*.cts', '**/*.mts', '**/*.ts']),
   allTsxFiles: Object.freeze(['**/*.tsx']),
   allConfigScriptFiles: Object.freeze([
-    '**/*.config.ts',
-    '**/*.config.mts',
     '**/*.config.cts',
+    '**/*.config.cjs',
     '**/*.config.js',
     '**/*.config.mjs',
-    '**/*.config.cjs',
-    '**/.*rc.ts',
-    '**/.*rc.mts',
+    '**/*.config.mts',
+    '**/*.config.ts',
     '**/.*rc.cts',
+    '**/.*rc.cjs',
     '**/.*rc.js',
     '**/.*rc.mjs',
-    '**/.*rc.cjs',
+    '**/.*rc.mts',
+    '**/.*rc.ts',
   ]),
   playwrightTypeScriptFiles: Object.freeze(['tests/**/*.ts', 'playwright.config.ts']),
-  rootScriptFiles: Object.freeze(['*.tsx', '*.mts', '*.ts', '*.cts', '*.jsx', '*.mjs', '*.js', '*.cjs']),
-  rootJavaScriptFiles: Object.freeze(['*.js', '*.mjs', '*.cjs']),
+  rootScriptFiles: Object.freeze(['*.cjs', '*.cts', '*.js', '*.jsx', '*.mjs', '*.mts', '*.ts', '*.tsx']),
+  rootJavaScriptFiles: Object.freeze(['*.cjs', '*.js', '*.mjs']),
   rootJsxFiles: Object.freeze(['*.jsx']),
-  rootTypeScriptFiles: Object.freeze(['*.ts', '*.mts', '*.cts']),
+  rootTypeScriptFiles: Object.freeze(['*.cts', '*.mts', '*.ts']),
   rootTsxFiles: Object.freeze(['*.tsx']),
   rootConfigScriptFiles: Object.freeze([
-    '*.config.ts',
-    '*.config.mts',
     '*.config.cts',
+    '*.config.cjs',
     '*.config.js',
     '*.config.mjs',
-    '*.config.cjs',
-    '.*rc.ts',
-    '.*rc.mts',
+    '*.config.mts',
+    '*.config.ts',
     '.*rc.cts',
+    '.*rc.cjs',
     '.*rc.js',
     '.*rc.mjs',
-    '.*rc.cjs',
+    '.*rc.mts',
+    '.*rc.ts',
   ]),
-  defaultIgnorePatterns: Object.freeze(['**/.DS_Store', '**/.fleet', '**/.idea', '**/.vscode', '**/.zed']),
 });
 
 const filesConfig = (files) => (files === undefined ? {} : { files: [...files] });
@@ -78,13 +80,13 @@ export class ESLintConfigBuilder {
     return this;
   }
 
-  #addGlobals(globals = {}, { files } = {}) {
+  #addGlobals(globalVariables = {}, { files } = {}) {
     return this.#addConfig({
       ...filesConfig(files),
       extends: [
         {
           languageOptions: {
-            globals: globals,
+            globals: globalVariables,
           },
         },
       ],
@@ -163,7 +165,7 @@ export class ESLintConfigBuilder {
         {
           languageOptions: {
             parserOptions: {
-              project: project,
+              project,
               projectService: false,
             },
           },
@@ -184,7 +186,6 @@ export class ESLintConfigBuilder {
             '@typescript-eslint/explicit-member-accessibility': 'error',
             '@typescript-eslint/method-signature-style': 'error',
             '@typescript-eslint/no-import-type-side-effects': 'error',
-            '@typescript-eslint/no-loop-func': 'error',
             '@typescript-eslint/no-shadow': 'error',
             '@typescript-eslint/no-unnecessary-parameter-property-assignment': 'error',
             '@typescript-eslint/no-unnecessary-qualifier': 'error',
@@ -211,7 +212,7 @@ export class ESLintConfigBuilder {
             ],
             '@typescript-eslint/switch-exhaustiveness-check': 'error',
             'default-param-last': 'off',
-            'no-loop-func': 'off',
+            'no-loop-func': 'error',
             'no-shadow': 'off',
             'no-use-before-define': 'off',
             ...rules,
@@ -646,7 +647,11 @@ export class ESLintConfigBuilder {
     });
   }
 
-  addGlobalIgnores(patterns = filePatterns.defaultIgnorePatterns, name = undefined) {
+  addGitIgnoreFile(configUrl) {
+    return this.#addConfig(includeIgnoreFile(fileURLToPath(new URL('.gitignore', configUrl))));
+  }
+
+  addGlobalIgnores(patterns, name = undefined) {
     return this.#addConfig({
       extends: [globalIgnores(patterns, name)],
     });
@@ -655,7 +660,7 @@ export class ESLintConfigBuilder {
   addNodeGlobalsForConfigFiles() {
     return this.#addGlobals({
       ...globals.node,
-      ...globals.es2024,
+      ...globals.es2025,
     }, {
       files: filePatterns.allConfigScriptFiles,
     });
@@ -664,14 +669,14 @@ export class ESLintConfigBuilder {
   addBrowserGlobals({ files } = {}) {
     return this.#addGlobals({
       ...globals.browser,
-      ...globals.es2024,
+      ...globals.es2025,
     }, { files });
   }
 
   addNodeGlobals({ files } = {}) {
     return this.#addGlobals({
       ...globals.node,
-      ...globals.es2024,
+      ...globals.es2025,
     }, { files });
   }
 

@@ -10,13 +10,12 @@
  * @see {@link https://github.com/sponsors/tomaschochola} GitHub Sponsors
  */
 
-import { ESLintConfigBuilder, filePatterns } from './src/index.js';
+import { ESLintConfigBuilder } from './src/index.js';
 
 // eslint-disable-next-line no-restricted-exports
 export default new ESLintConfigBuilder()
   .addNodeGlobals()
-  .addGlobalIgnores(filePatterns.defaultIgnorePatterns)
-  .addGlobalIgnores(['node_modules'])
+  .addGitIgnoreFile(import.meta.url)
   .addJavaScriptRecommendedRules()
   .addJavaScriptPolicyRules()
   .addStylisticCustomizedRules()
