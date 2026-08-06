@@ -12,16 +12,10 @@
 
 import { ESLintConfigBuilder } from '@tomaschochola/tooling-eslint';
 
-// eslint-disable-next-line no-restricted-exports
 export default new ESLintConfigBuilder()
   .addNodeGlobalsForConfigFiles()
   .addBrowserGlobals()
   .addGitIgnoreFile(import.meta.url)
   .addJavaScriptRecommendedRules()
-  .addJavaScriptPolicyRules()
-  .addStylisticCustomizedRules()
-  .addStylisticPolicyRules()
-  .disableStylisticLegacyRules()
   .addSonarJsRecommendedRules()
-  .addSonarJsPolicyOverrides()
   .toConfig();

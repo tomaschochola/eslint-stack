@@ -16,21 +16,18 @@
     }
   ],
   "dependencies": {
-    "@eslint/compat": "^2.1.0",
-    "@eslint/js": "^9.39.5",
-    "@stylistic/eslint-plugin": "^5.10.0",
-    "eslint": "^9.39.5",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react": "^7.37.5",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-sonarjs": "^4.2.0",
     "globals": "^17.9.0",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.66.0"
   },
-  "description": "Shared ESLint configuration builder and policy rules for JavaScript, TypeScript, React, and Node.js.",
+  "description": "Shared ESLint configuration builder and presets for JavaScript, TypeScript, React Hooks, and Node.js.",
   "devDependencies": {
-    "@tomaschochola/tooling-prettier": "github:tomaschochola/tooling-prettier#2.x",
-    "@tomaschochola/tooling-trimmer": "github:tomaschochola/tooling-trimmer#2.x"
+    "@tomaschochola/tooling-prettier": "github:tomaschochola/tooling-prettier#main",
+    "@tomaschochola/tooling-trimmer": "github:tomaschochola/tooling-trimmer#main"
   },
   "exports": {
     ".": "./src/index.js"
@@ -66,5 +63,5 @@
     "url": "git+https://github.com/tomaschochola/tooling-eslint.git"
   },
   "type": "module",
-  "version": "2.0.0"
+  "version": "0.0.0"
 }
