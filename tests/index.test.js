@@ -39,19 +39,14 @@ test('file patterns are immutable', () => {
 });
 
 test('browser globals are available only when requested', async () => {
-  const withoutBrowserGlobals = await lintText(
-    new ESLintConfigBuilder().addJavaScriptRecommendedRules(),
-    'document.title = "test";\n',
-    'src/browser.js',
-  );
+  const withoutBrowserGlobals = await lintText(new ESLintConfigBuilder().addJavaScriptRecommendedRules(), 'document.title = "test";\n', 'src/browser.js');
 
-  const withBrowserGlobals = await lintText(
-    new ESLintConfigBuilder().addBrowserGlobals().addJavaScriptRecommendedRules(),
-    'document.title = "test";\n',
-    'src/browser.js',
-  );
+  const withBrowserGlobals = await lintText(new ESLintConfigBuilder().addBrowserGlobals().addJavaScriptRecommendedRules(), 'document.title = "test";\n', 'src/browser.js');
 
-  assert.deepEqual(withoutBrowserGlobals.messages.map(({ ruleId }) => ruleId), ['no-undef']);
+  assert.deepEqual(
+    withoutBrowserGlobals.messages.map(({ ruleId }) => ruleId),
+    ['no-undef'],
+  );
   assert.equal(withBrowserGlobals.errorCount, 0);
 });
 
@@ -87,15 +82,19 @@ test('raw configuration, configuration-file globals, project service, and type-c
   const [configFileResult] = await eslint.lintText('process.exitCode = value == null ? 0 : 1;\n', { filePath: 'eslint.config.js' });
   const typescriptConfig = await eslint.calculateConfigForFile('src/index.ts');
 
-  assert.deepEqual(configFileResult.messages.map(({ ruleId }) => ruleId), ['eqeqeq']);
+  assert.deepEqual(
+    configFileResult.messages.map(({ ruleId }) => ruleId),
+    ['eqeqeq'],
+  );
   assert.equal(typescriptConfig.languageOptions.parserOptions.projectService, true);
 });
 
 test('TypeScript rule profiles remain independently selectable', async () => {
-  const calculateConfig = async (builder) => new ESLint({
-    overrideConfig: builder.toConfig(),
-    overrideConfigFile: true,
-  }).calculateConfigForFile('src/index.ts');
+  const calculateConfig = async (builder) =>
+    new ESLint({
+      overrideConfig: builder.toConfig(),
+      overrideConfigFile: true,
+    }).calculateConfigForFile('src/index.ts');
 
   const recommended = await calculateConfig(new ESLintConfigBuilder().addTypeScriptRecommendedTypeCheckedRules());
   const strict = await calculateConfig(new ESLintConfigBuilder().addTypeScriptStrictTypeCheckedRules());
@@ -124,16 +123,19 @@ test('TypeScript, React Hooks, and Sonar configurations compose', async (context
 
   const tsconfig = join(directory, 'tsconfig.json');
 
-  await writeFile(tsconfig, JSON.stringify({
-    compilerOptions: {
-      jsx: 'react-jsx',
-      module: 'NodeNext',
-      moduleResolution: 'NodeNext',
-      strict: true,
-      target: 'ES2025',
-    },
-    files: ['sample.ts', 'sample.tsx'],
-  }));
+  await writeFile(
+    tsconfig,
+    JSON.stringify({
+      compilerOptions: {
+        jsx: 'react-jsx',
+        module: 'NodeNext',
+        moduleResolution: 'NodeNext',
+        strict: true,
+        target: 'ES2025',
+      },
+      files: ['sample.ts', 'sample.tsx'],
+    }),
+  );
   await writeFile(join(directory, 'sample.ts'), 'export const answer = 42;\n');
   await writeFile(join(directory, 'sample.tsx'), 'export const component = <main>answer</main>;\n');
 

@@ -122,9 +122,7 @@ export class ESLintConfigBuilder {
   }
 
   addTypeScriptOpinionatedTypeCheckedRules({ files } = {}) {
-    return this
-      .addTypeScriptStrictTypeCheckedRules({ files })
-      .addTypeScriptStylisticTypeCheckedRules({ files });
+    return this.addTypeScriptStrictTypeCheckedRules({ files }).addTypeScriptStylisticTypeCheckedRules({ files });
   }
 
   enableTypeScriptProjectService({ files } = {}) {
@@ -173,9 +171,11 @@ export class ESLintConfigBuilder {
   }
 
   addGitIgnoreFile(configUrl) {
-    return this.#addConfig(includeIgnoreFile(fileURLToPath(new URL('.gitignore', configUrl)), {
-      gitignoreResolution: true,
-    }));
+    return this.#addConfig(
+      includeIgnoreFile(fileURLToPath(new URL('.gitignore', configUrl)), {
+        gitignoreResolution: true,
+      }),
+    );
   }
 
   addGlobalIgnores(patterns, name = undefined) {
@@ -185,26 +185,35 @@ export class ESLintConfigBuilder {
   }
 
   addNodeGlobalsForConfigFiles() {
-    return this.#addGlobals({
-      ...globals.node,
-      ...globals.es2025,
-    }, {
-      files: filePatterns.allConfigScriptFiles,
-    });
+    return this.#addGlobals(
+      {
+        ...globals.node,
+        ...globals.es2025,
+      },
+      {
+        files: filePatterns.allConfigScriptFiles,
+      },
+    );
   }
 
   addBrowserGlobals({ files } = {}) {
-    return this.#addGlobals({
-      ...globals.browser,
-      ...globals.es2025,
-    }, { files });
+    return this.#addGlobals(
+      {
+        ...globals.browser,
+        ...globals.es2025,
+      },
+      { files },
+    );
   }
 
   addNodeGlobals({ files } = {}) {
-    return this.#addGlobals({
-      ...globals.node,
-      ...globals.es2025,
-    }, { files });
+    return this.#addGlobals(
+      {
+        ...globals.node,
+        ...globals.es2025,
+      },
+      { files },
+    );
   }
 
   disableTypeScriptTypeChecking({ files } = {}) {
