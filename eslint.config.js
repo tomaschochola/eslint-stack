@@ -13,8 +13,8 @@
 import { ESLintConfigBuilder } from './src/index.js';
 
 export default new ESLintConfigBuilder()
-  .addNodeGlobals()
-  .addGitIgnoreFile(import.meta.url)
-  .addJavaScriptRecommendedRules()
-  .addSonarJsRecommendedRules()
-  .toConfig();
+    .addNodeGlobals()
+    .addGitIgnoreFile(import.meta.url)
+    .addJavaScriptRecommendedRules()
+    .addSonarJsRecommendedRules()
+    .toConfig();

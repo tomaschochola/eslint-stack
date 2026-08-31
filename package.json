@@ -1,67 +1,67 @@
 {
-  "author": {
-    "email": "tomaschochola@tomaschochola.cz",
-    "name": "Tomáš Chochola",
-    "url": "https://github.com/tomaschochola"
-  },
-  "bugs": {
-    "email": "tomaschochola@tomaschochola.cz",
-    "url": "https://github.com/tomaschochola/tooling-eslint/issues"
-  },
-  "contributors": [
-    {
-      "email": "tomaschochola@tomaschochola.cz",
-      "name": "Tomáš Chochola",
-      "url": "https://github.com/tomaschochola"
-    }
-  ],
-  "dependencies": {
-    "@eslint/js": "^10.0.1",
-    "eslint": "^10.8.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-sonarjs": "^4.2.0",
-    "globals": "^17.9.0",
-    "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "typescript-eslint": "^8.66.0"
-  },
-  "description": "Shared ESLint configuration builder and presets for JavaScript, TypeScript, React Hooks, and Node.js.",
-  "devDependencies": {
-    "@tomaschochola/tooling-prettier": "github:tomaschochola/tooling-prettier#main",
-    "@tomaschochola/tooling-trimmer": "github:tomaschochola/tooling-trimmer#main"
-  },
-  "exports": {
-    ".": "./src/index.js"
-  },
-  "files": [
-    "src",
-    "templates"
-  ],
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/tomaschochola"
-  },
-  "homepage": "https://github.com/tomaschochola/tooling-eslint",
-  "keywords": [
-    "tomaschochola",
-    "TomasChochola",
-    "Tomas Chochola",
-    "Tomáš Chochola",
-    "code-quality",
-    "eslint",
-    "javascript",
-    "linting",
-    "react",
-    "tooling-eslint",
-    "typescript"
-  ],
-  "license": "CC-BY-ND-4.0",
-  "main": "./src/index.js",
-  "name": "@tomaschochola/tooling-eslint",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tomaschochola/tooling-eslint.git"
-  },
-  "type": "module",
-  "version": "0.0.0"
+    "author": {
+        "email": "tomaschochola@tomaschochola.cz",
+        "name": "Tomáš Chochola",
+        "url": "https://github.com/tomaschochola"
+    },
+    "bugs": {
+        "email": "tomaschochola@tomaschochola.cz",
+        "url": "https://github.com/tomaschochola/tooling-eslint/issues"
+    },
+    "contributors": [
+        {
+            "email": "tomaschochola@tomaschochola.cz",
+            "name": "Tomáš Chochola",
+            "url": "https://github.com/tomaschochola"
+        }
+    ],
+    "dependencies": {
+        "@eslint/js": "^10.0.1",
+        "eslint": "^10.8.0",
+        "eslint-plugin-react-hooks": "^7.1.1",
+        "eslint-plugin-sonarjs": "^4.2.0",
+        "globals": "^17.9.0",
+        "typescript": "npm:@typescript/typescript6@^6.0.2",
+        "typescript-eslint": "^8.66.0"
+    },
+    "description": "Shared ESLint configuration builder and presets for JavaScript, TypeScript, React Hooks, and Node.js.",
+    "devDependencies": {
+        "@tomaschochola/tooling-prettier": "git+https://github.com/tomaschochola/tooling-prettier.git#main",
+        "@tomaschochola/tooling-trimmer": "git+https://github.com/tomaschochola/tooling-trimmer.git#main"
+    },
+    "exports": {
+        ".": "./src/index.js"
+    },
+    "files": [
+        "src",
+        "templates"
+    ],
+    "funding": {
+        "type": "github",
+        "url": "https://github.com/sponsors/tomaschochola"
+    },
+    "homepage": "https://github.com/tomaschochola/tooling-eslint",
+    "keywords": [
+        "tomaschochola",
+        "TomasChochola",
+        "Tomas Chochola",
+        "Tomáš Chochola",
+        "code-quality",
+        "eslint",
+        "javascript",
+        "linting",
+        "react",
+        "tooling-eslint",
+        "typescript"
+    ],
+    "license": "CC-BY-ND-4.0",
+    "main": "./src/index.js",
+    "name": "@tomaschochola/tooling-eslint",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tomaschochola/tooling-eslint.git"
+    },
+    "type": "module",
+    "version": "0.0.0"
 }
