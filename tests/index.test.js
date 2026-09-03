@@ -31,7 +31,9 @@ const lintText = async (builder, code, filePath) => {
 
 test('file patterns are immutable', () => {
     assert.equal(Object.isFrozen(filePatterns), true);
-    assert.deepEqual(filePatterns.allTypeScriptDeclarationFiles, ['**/*.d.cts', '**/*.d.mts', '**/*.d.ts', '**/*.d.*.ts']);
+    assert.deepEqual(Object.keys(filePatterns), ['configurations', 'declarations', 'javascript', 'jsx', 'playwright', 'scripts', 'tsx', 'typescript']);
+    assert.deepEqual(filePatterns.declarations, ['**/*.d.cts', '**/*.d.mts', '**/*.d.ts', '**/*.d.*.ts']);
+    assert.deepEqual(filePatterns.playwright, ['playwright.config.cts', 'playwright.config.mts', 'playwright.config.ts', 'tests/**/*.cts', 'tests/**/*.mts', 'tests/**/*.ts', 'tests/**/*.tsx']);
 
     for (const patterns of Object.values(filePatterns)) {
         assert.equal(Object.isFrozen(patterns), true);
@@ -41,13 +43,117 @@ test('file patterns are immutable', () => {
 test('browser globals are available only when requested', async () => {
     const withoutBrowserGlobals = await lintText(new ESLintConfigBuilder().addJavaScriptRecommendedRules(), 'document.title = "test";\n', 'src/browser.js');
 
-    const withBrowserGlobals = await lintText(new ESLintConfigBuilder().addBrowserGlobals().addJavaScriptRecommendedRules(), 'document.title = "test";\n', 'src/browser.js');
+    const withBrowserGlobals = await lintText(new ESLintConfigBuilder().addBrowserGlobals({ files: ['src/**/*.js'] }).addJavaScriptRecommendedRules(), 'document.title = "test";\n', 'src/browser.js');
+    const configFile = await lintText(
+        new ESLintConfigBuilder()
+            .addNodeGlobalsForConfigFiles()
+            .addBrowserGlobals({ files: ['src/**/*.js'] })
+            .addJavaScriptRecommendedRules(),
+        'document.title = process.env.NODE_ENV ?? "";\n',
+        'eslint.config.js',
+    );
 
     assert.deepEqual(
         withoutBrowserGlobals.messages.map(({ ruleId }) => ruleId),
         ['no-undef'],
     );
     assert.equal(withBrowserGlobals.errorCount, 0);
+    assert.deepEqual(
+        configFile.messages.map(({ ruleId }) => ruleId),
+        ['no-undef'],
+    );
+});
+
+test('file-scoped APIs reject ambiguous arguments', () => {
+    assert.throws(() => new ESLintConfigBuilder().addBrowserGlobals(), {
+        message: 'files must be a non-empty array of ESLint file patterns.',
+        name: 'TypeError',
+    });
+    assert.throws(() => new ESLintConfigBuilder().addNodeGlobals({ files: 'src/**/*.js' }), {
+        message: 'files must be a non-empty array of ESLint file patterns.',
+        name: 'TypeError',
+    });
+    assert.throws(() => new ESLintConfigBuilder().addNodeGlobals({ files: [] }), {
+        message: 'files must be a non-empty array of ESLint file patterns.',
+        name: 'TypeError',
+    });
+    assert.throws(() => new ESLintConfigBuilder().addNativeBrowserModuleRules({ files: [''] }), {
+        message: 'Each ESLint file pattern must be a non-empty string or a non-empty array of non-empty strings.',
+        name: 'TypeError',
+    });
+    assert.throws(() => new ESLintConfigBuilder().addNativeBrowserModuleRules({ files: [[]] }), {
+        message: 'Each ESLint file pattern must be a non-empty string or a non-empty array of non-empty strings.',
+        name: 'TypeError',
+    });
+    assert.throws(() => new ESLintConfigBuilder().addNativeBrowserModuleRules({ files: [['src/**', '']] }), {
+        message: 'Each ESLint file pattern must be a non-empty string or a non-empty array of non-empty strings.',
+        name: 'TypeError',
+    });
+    assert.throws(() => new ESLintConfigBuilder().enableTypeScriptProject({ project: [] }), {
+        message: 'project must be a non-empty path or a non-empty array of paths.',
+        name: 'TypeError',
+    });
+    assert.throws(() => new ESLintConfigBuilder().enableTypeScriptProject({ project: '' }), {
+        message: 'project must be a non-empty path or a non-empty array of paths.',
+        name: 'TypeError',
+    });
+    assert.throws(() => new ESLintConfigBuilder().enableTypeScriptProject({ project: [''] }), {
+        message: 'project must be a non-empty path or a non-empty array of paths.',
+        name: 'TypeError',
+    });
+    assert.throws(() => new ESLintConfigBuilder().enableTypeScriptProject({ project: true }), {
+        message: 'project must be a non-empty path or a non-empty array of paths.',
+        name: 'TypeError',
+    });
+
+    const files = [['src/**', '**/*.js']];
+    const projects = ['tsconfig.json'];
+    const config = new ESLintConfigBuilder()
+        .addNodeGlobals({ files })
+        .enableTypeScriptProject({ files: ['**/*.ts'], project: projects })
+        .toConfig();
+    files[0].push('mutated');
+    projects.push('mutated.json');
+
+    const fileConfiguration = config.find((configuration) => configuration.languageOptions?.globals !== undefined);
+    const projectConfiguration = config.find((configuration) => configuration.languageOptions?.parserOptions?.project !== undefined);
+
+    assert.deepEqual(fileConfiguration.files, [['src/**', '**/*.js']]);
+    assert.deepEqual(projectConfiguration.languageOptions.parserOptions.project, ['tsconfig.json']);
+});
+
+test('native browser module rules enforce runtime-resolvable imports', async () => {
+    const builder = new ESLintConfigBuilder()
+        .addBrowserGlobals({ files: ['src/**/*.js'] })
+        .addJavaScriptRecommendedRules({ files: filePatterns.javascript })
+        .addNativeBrowserModuleRules({ files: ['src/**/*.js'] });
+    const valid = await lintText(
+        builder,
+        "import data from './data.json' with { type: 'json' };\nimport './module.js';\nexport * from '../shared/module.mjs';\nconsole.log(data);\nvoid import('./lazy.js');\nvoid import('./lazy.json', { with: { type: 'json' } });\n",
+        'src/valid.js',
+    );
+    const invalid = await lintText(
+        builder,
+        "import 'package';\nimport './legacy.cjs';\nexport { value } from '@scope/package';\nexport * from 'https://example.com/module.js';\nvoid import('package');\nconst specifier = './module.js';\nvoid import(specifier);\nvoid import(1);\nvoid import(`./${specifier}.js`);\nvoid import('./legacy.cjs');\nvoid import('/absolute/module.js');\n",
+        'src/invalid.js',
+    );
+
+    assert.equal(valid.errorCount, 0);
+    assert.deepEqual(
+        invalid.messages.map(({ ruleId }) => ruleId),
+        [
+            'no-restricted-imports',
+            'no-restricted-imports',
+            'no-restricted-imports',
+            'no-restricted-imports',
+            'no-restricted-syntax',
+            'no-restricted-syntax',
+            'no-restricted-syntax',
+            'no-restricted-syntax',
+            'no-restricted-syntax',
+            'no-restricted-syntax',
+        ],
+    );
 });
 
 test('Git ignore files and explicit global ignores are honored', async () => {
@@ -65,8 +171,8 @@ test('Git ignore files and explicit global ignores are honored', async () => {
 });
 
 test('raw configuration, configuration-file globals, project service, and type-check disabling compose', async () => {
-    const typescriptFiles = filePatterns.allTypeScriptFiles;
-    const javascriptFiles = filePatterns.allJavaScriptFiles;
+    const typescriptFiles = filePatterns.typescript;
+    const javascriptFiles = filePatterns.javascript;
 
     const eslint = new ESLint({
         overrideConfig: new ESLintConfigBuilder()
@@ -133,24 +239,29 @@ test('TypeScript, React Hooks, and Sonar configurations compose', async (context
                 strict: true,
                 target: 'ES2025',
             },
-            files: ['sample.ts', 'sample.tsx'],
+            files: ['sample.ts', 'sample.tsx', 'types.d.ts'],
         }),
     );
-    await writeFile(join(directory, 'sample.ts'), 'export const answer = 42;\n');
+    await writeFile(
+        join(directory, 'sample.ts'),
+        "import type { External } from 'external-types';\nexport type { External } from 'external-types';\nexport type * from 'external-types';\nexport type Answer = External;\nexport const answer = 42;\n",
+    );
     await writeFile(join(directory, 'sample.tsx'), 'export const component = <main>answer</main>;\n');
+    await writeFile(join(directory, 'types.d.ts'), "declare module 'external-types' {\n    export interface External {\n        readonly value: string;\n    }\n}\n");
 
-    const typescriptFiles = [...filePatterns.allTypeScriptFiles, ...filePatterns.allTsxFiles];
+    const typescriptFiles = [...filePatterns.typescript, ...filePatterns.tsx];
 
     const eslint = new ESLint({
         cwd: directory,
         overrideConfig: new ESLintConfigBuilder()
-            .addBrowserGlobals()
+            .addBrowserGlobals({ files: typescriptFiles })
             .addJavaScriptRecommendedRules()
             .addTypeScriptStrictTypeCheckedRules({ files: typescriptFiles })
             .enableTypeScriptProject({
                 files: typescriptFiles,
                 project: tsconfig,
             })
+            .addNativeBrowserModuleRules({ files: typescriptFiles })
             .addReactHooksRecommendedLatestRules()
             .addSonarJsRecommendedRules()
             .toConfig(),

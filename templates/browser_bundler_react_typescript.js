@@ -12,14 +12,18 @@
 
 import { ESLintConfigBuilder, filePatterns } from '@tomaschochola/tooling-eslint';
 
+const browserFiles = ['src/**/*.js', 'src/**/*.jsx', 'src/**/*.mjs', 'src/**/*.mts', 'src/**/*.ts', 'src/**/*.tsx'];
 const typescriptFiles = [...filePatterns.typescript, ...filePatterns.tsx];
 
 export default new ESLintConfigBuilder()
-    .addNodeGlobals({ files: filePatterns.scripts })
+    .addNodeGlobalsForConfigFiles()
+    .addBrowserGlobals({ files: browserFiles })
     .addGitIgnoreFile(import.meta.url)
     .addJavaScriptRecommendedRules({ files: filePatterns.scripts })
     .addTypeScriptRecommendedTypeCheckedRules({ files: typescriptFiles })
     // Replace the preceding recommended profile with .addTypeScriptStrictTypeCheckedRules({ files: typescriptFiles }) when its complete policy is desired.
     .enableTypeScriptProjectService({ files: typescriptFiles })
-    // .addSonarJsRecommendedRules({ files: filePatterns.scripts })
+    .enableTypeScriptProject({ files: filePatterns.playwright, project: './tsconfig.playwright.json' })
+    .addReactHooksRecommendedLatestRules({ files: browserFiles })
+    // .addSonarJsRecommendedRules({ files: browserFiles })
     .toConfig();

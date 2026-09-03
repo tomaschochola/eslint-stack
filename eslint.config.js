@@ -10,10 +10,10 @@
  * @see {@link https://github.com/sponsors/tomaschochola} GitHub Sponsors
  */
 
-import { ESLintConfigBuilder } from './src/index.js';
+import { ESLintConfigBuilder, filePatterns } from './src/index.js';
 
 export default new ESLintConfigBuilder()
-    .addNodeGlobals()
+    .addNodeGlobals({ files: filePatterns.scripts })
     .addGitIgnoreFile(import.meta.url)
     .addJavaScriptRecommendedRules()
     .addSonarJsRecommendedRules()

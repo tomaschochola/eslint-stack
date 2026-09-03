@@ -10,11 +10,15 @@
  * @see {@link https://github.com/sponsors/tomaschochola} GitHub Sponsors
  */
 
-import { ESLintConfigBuilder } from '@tomaschochola/tooling-eslint';
+import { ESLintConfigBuilder, filePatterns } from '@tomaschochola/tooling-eslint';
+
+const browserFiles = ['src/**/*.js', 'src/**/*.mjs'];
 
 export default new ESLintConfigBuilder()
-    .addNodeGlobals()
+    .addNodeGlobalsForConfigFiles()
+    .addBrowserGlobals({ files: browserFiles })
     .addGitIgnoreFile(import.meta.url)
-    .addJavaScriptRecommendedRules()
-    .addSonarJsRecommendedRules()
+    .addJavaScriptRecommendedRules({ files: filePatterns.scripts })
+    .addNativeBrowserModuleRules({ files: browserFiles })
+    // .addSonarJsRecommendedRules({ files: browserFiles })
     .toConfig();

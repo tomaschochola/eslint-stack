@@ -18,50 +18,77 @@ import globals from 'globals';
 import { fileURLToPath } from 'node:url';
 import typescript from 'typescript-eslint';
 
+const configurations = Object.freeze([
+    '**/*.config.cts',
+    '**/*.config.cjs',
+    '**/*.config.js',
+    '**/*.config.mjs',
+    '**/*.config.mts',
+    '**/*.config.ts',
+    '**/.*rc.cts',
+    '**/.*rc.cjs',
+    '**/.*rc.js',
+    '**/.*rc.mjs',
+    '**/.*rc.mts',
+    '**/.*rc.ts',
+]);
+const declarations = Object.freeze(['**/*.d.cts', '**/*.d.mts', '**/*.d.ts', '**/*.d.*.ts']);
+const javascript = Object.freeze(['**/*.cjs', '**/*.js', '**/*.mjs']);
+const jsx = Object.freeze(['**/*.jsx']);
+const playwright = Object.freeze(['playwright.config.cts', 'playwright.config.mts', 'playwright.config.ts', 'tests/**/*.cts', 'tests/**/*.mts', 'tests/**/*.ts', 'tests/**/*.tsx']);
+const tsx = Object.freeze(['**/*.tsx']);
+const typescriptPatterns = Object.freeze(['**/*.cts', '**/*.mts', '**/*.ts']);
+
 export const filePatterns = Object.freeze({
-    allScriptFiles: Object.freeze(['**/*.cjs', '**/*.cts', '**/*.js', '**/*.jsx', '**/*.mjs', '**/*.mts', '**/*.ts', '**/*.tsx']),
-    allJavaScriptFiles: Object.freeze(['**/*.cjs', '**/*.js', '**/*.mjs']),
-    allJsxFiles: Object.freeze(['**/*.jsx']),
-    allTypeScriptDeclarationFiles: Object.freeze(['**/*.d.cts', '**/*.d.mts', '**/*.d.ts', '**/*.d.*.ts']),
-    allTypeScriptFiles: Object.freeze(['**/*.cts', '**/*.mts', '**/*.ts']),
-    allTsxFiles: Object.freeze(['**/*.tsx']),
-    allConfigScriptFiles: Object.freeze([
-        '**/*.config.cts',
-        '**/*.config.cjs',
-        '**/*.config.js',
-        '**/*.config.mjs',
-        '**/*.config.mts',
-        '**/*.config.ts',
-        '**/.*rc.cts',
-        '**/.*rc.cjs',
-        '**/.*rc.js',
-        '**/.*rc.mjs',
-        '**/.*rc.mts',
-        '**/.*rc.ts',
-    ]),
-    playwrightTypeScriptFiles: Object.freeze(['tests/**/*.ts', 'playwright.config.ts']),
-    rootScriptFiles: Object.freeze(['*.cjs', '*.cts', '*.js', '*.jsx', '*.mjs', '*.mts', '*.ts', '*.tsx']),
-    rootJavaScriptFiles: Object.freeze(['*.cjs', '*.js', '*.mjs']),
-    rootJsxFiles: Object.freeze(['*.jsx']),
-    rootTypeScriptFiles: Object.freeze(['*.cts', '*.mts', '*.ts']),
-    rootTsxFiles: Object.freeze(['*.tsx']),
-    rootConfigScriptFiles: Object.freeze([
-        '*.config.cts',
-        '*.config.cjs',
-        '*.config.js',
-        '*.config.mjs',
-        '*.config.mts',
-        '*.config.ts',
-        '.*rc.cts',
-        '.*rc.cjs',
-        '.*rc.js',
-        '.*rc.mjs',
-        '.*rc.mts',
-        '.*rc.ts',
-    ]),
+    configurations,
+    declarations,
+    javascript,
+    jsx,
+    playwright,
+    scripts: Object.freeze([...javascript, ...jsx, ...typescriptPatterns, ...tsx]),
+    tsx,
+    typescript: typescriptPatterns,
 });
 
-const filesConfig = (files) => (files === undefined ? {} : { files: [...files] });
+function normalizeFilePatterns(files, { required = false } = {}) {
+    if (files === undefined && !required) {
+        return undefined;
+    }
+
+    if (!Array.isArray(files) || files.length === 0) {
+        throw new TypeError('files must be a non-empty array of ESLint file patterns.');
+    }
+
+    return files.map((pattern) => {
+        if (typeof pattern === 'string' && pattern.length > 0) {
+            return pattern;
+        }
+
+        if (Array.isArray(pattern) && pattern.length > 0 && pattern.every((part) => typeof part === 'string' && part.length > 0)) {
+            return [...pattern];
+        }
+
+        throw new TypeError('Each ESLint file pattern must be a non-empty string or a non-empty array of non-empty strings.');
+    });
+}
+
+function normalizeProject(project) {
+    if (typeof project === 'string' && project.length > 0) {
+        return project;
+    }
+
+    if (Array.isArray(project) && project.length > 0 && project.every((path) => typeof path === 'string' && path.length > 0)) {
+        return [...project];
+    }
+
+    throw new TypeError('project must be a non-empty path or a non-empty array of paths.');
+}
+
+const filesConfig = (files, options = {}) => {
+    const normalized = normalizeFilePatterns(files, options);
+
+    return normalized === undefined ? {} : { files: normalized };
+};
 
 export class ESLintConfigBuilder {
     #config;
@@ -78,7 +105,7 @@ export class ESLintConfigBuilder {
 
     #addGlobals(globalVariables = {}, { files } = {}) {
         return this.#addConfig({
-            ...filesConfig(files),
+            ...filesConfig(files, { required: true }),
             extends: [
                 {
                     languageOptions: {
@@ -147,7 +174,7 @@ export class ESLintConfigBuilder {
                 {
                     languageOptions: {
                         parserOptions: {
-                            project,
+                            project: normalizeProject(project),
                             projectService: false,
                         },
                     },
@@ -167,6 +194,37 @@ export class ESLintConfigBuilder {
         return this.#addConfig({
             ...filesConfig(files),
             extends: [sonarjs.configs.recommended],
+        });
+    }
+
+    addNativeBrowserModuleRules({ files } = {}) {
+        return this.#addConfig({
+            ...filesConfig(files, { required: true }),
+            rules: {
+                'no-restricted-imports': [
+                    'error',
+                    {
+                        patterns: [
+                            {
+                                allowTypeImports: true,
+                                message: 'Native browser runtime imports must use relative JavaScript or JSON URLs.',
+                                regex: '^(?!\\.{1,2}/)|\\.(?:cjs|cts|jsx|ts|tsx)(?:[?#]|$)',
+                            },
+                        ],
+                    },
+                ],
+                'no-restricted-syntax': [
+                    'error',
+                    {
+                        message: 'Native browser dynamic imports must use a string literal.',
+                        selector: 'ImportExpression:not([source.value=/^.*$/])',
+                    },
+                    {
+                        message: 'Native browser dynamic imports must use relative JavaScript or JSON URLs.',
+                        selector: 'ImportExpression[source.value=/^(?![.][.]?\\u002f)|[.](?:cjs|cts|jsx|ts|tsx)(?:[?#]|$)/]',
+                    },
+                ],
+            },
         });
     }
 
@@ -191,7 +249,7 @@ export class ESLintConfigBuilder {
                 ...globals.es2025,
             },
             {
-                files: filePatterns.allConfigScriptFiles,
+                files: filePatterns.configurations,
             },
         );
     }
