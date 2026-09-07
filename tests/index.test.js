@@ -33,7 +33,15 @@ test('file patterns are immutable', () => {
     assert.equal(Object.isFrozen(filePatterns), true);
     assert.deepEqual(Object.keys(filePatterns), ['configurations', 'declarations', 'javascript', 'jsx', 'playwright', 'scripts', 'tsx', 'typescript']);
     assert.deepEqual(filePatterns.declarations, ['**/*.d.cts', '**/*.d.mts', '**/*.d.ts', '**/*.d.*.ts']);
-    assert.deepEqual(filePatterns.playwright, ['playwright.config.cts', 'playwright.config.mts', 'playwright.config.ts', 'tests/**/*.cts', 'tests/**/*.mts', 'tests/**/*.ts', 'tests/**/*.tsx']);
+    assert.deepEqual(filePatterns.playwright, [
+        '**/playwright.config.cts',
+        '**/playwright.config.mts',
+        '**/playwright.config.ts',
+        'tests/**/*.cts',
+        'tests/**/*.mts',
+        'tests/**/*.ts',
+        'tests/**/*.tsx',
+    ]);
 
     for (const patterns of Object.values(filePatterns)) {
         assert.equal(Object.isFrozen(patterns), true);

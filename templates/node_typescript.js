@@ -19,7 +19,8 @@ export default new ESLintConfigBuilder()
     .addGitIgnoreFile(import.meta.url)
     .addJavaScriptRecommendedRules({ files: filePatterns.scripts })
     .addTypeScriptRecommendedTypeCheckedRules({ files: typescriptFiles })
-    // Replace the preceding recommended profile with .addTypeScriptStrictTypeCheckedRules({ files: typescriptFiles }) when its complete policy is desired.
+    // .addTypeScriptStrictTypeCheckedRules({ files: typescriptFiles })
+    // .addTypeScriptOpinionatedTypeCheckedRules({ files: typescriptFiles })
     .enableTypeScriptProjectService({ files: typescriptFiles })
     // .addSonarJsRecommendedRules({ files: filePatterns.scripts })
     .toConfig();

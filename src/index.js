@@ -35,7 +35,7 @@ const configurations = Object.freeze([
 const declarations = Object.freeze(['**/*.d.cts', '**/*.d.mts', '**/*.d.ts', '**/*.d.*.ts']);
 const javascript = Object.freeze(['**/*.cjs', '**/*.js', '**/*.mjs']);
 const jsx = Object.freeze(['**/*.jsx']);
-const playwright = Object.freeze(['playwright.config.cts', 'playwright.config.mts', 'playwright.config.ts', 'tests/**/*.cts', 'tests/**/*.mts', 'tests/**/*.ts', 'tests/**/*.tsx']);
+const playwright = Object.freeze(['**/playwright.config.cts', '**/playwright.config.mts', '**/playwright.config.ts', 'tests/**/*.cts', 'tests/**/*.mts', 'tests/**/*.ts', 'tests/**/*.tsx']);
 const tsx = Object.freeze(['**/*.tsx']);
 const typescriptPatterns = Object.freeze(['**/*.cts', '**/*.mts', '**/*.ts']);
 
